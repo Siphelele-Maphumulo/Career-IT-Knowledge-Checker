@@ -2646,13 +2646,17 @@ public void addNewQuestion(String questionText, String opt1, String opt2, String
 
 public int addNewQuestionReturnId(String questionText, String opt1, String opt2, String opt3, String opt4, String correctAnswer, String courseName, String questionType, String imagePath) {
 
-    return addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, imagePath, null);
+    return addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, imagePath, null, null);
 
 }
 
 
 
 public int addNewQuestionReturnId(String questionText, String opt1, String opt2, String opt3, String opt4, String correctAnswer, String courseName, String questionType, String imagePath, String extraData) {
+    return addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, imagePath, extraData, null);
+}
+
+public int addNewQuestionReturnId(String questionText, String opt1, String opt2, String opt3, String opt4, String correctAnswer, String courseName, String questionType, String imagePath, String extraData, Integer customMarks) {
 
     try {
 
@@ -2676,41 +2680,43 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
         String sql;
 
-        int marks = 1; // Default marks
+        float marks = 1.0f; // Default marks
 
-
-
-        // Set marks based on question type rubric
-
-        if ("MultipleSelect".equalsIgnoreCase(questionType)) {
-
-            marks = 2; // 2 marks for MultipleSelect (1 mark per correct selection)
-
-        } else if ("TrueFalse".equalsIgnoreCase(questionType)) {
-
-            marks = 1; // 1 mark for True/False
-
-        } else if ("MCQ".equalsIgnoreCase(questionType)) {
-
-            marks = 1; // 1 mark for MCQ
-
-        } else if ("FillInTheBlank".equalsIgnoreCase(questionType) || "FillInTheWord".equalsIgnoreCase(questionType)) {
-
-            marks = 1; // 1 mark for Fill in the missing word
-
+        if (customMarks != null) {
+            marks = (float) customMarks;
         } else {
+            // Set marks based on question type rubric
 
-            marks = 1; // Default 1 mark for other types
+            if ("MultipleSelect".equalsIgnoreCase(questionType)) {
 
+                marks = 2; // 2 marks for MultipleSelect (1 mark per correct selection)
+
+            } else if ("TrueFalse".equalsIgnoreCase(questionType)) {
+
+                marks = 1; // 1 mark for True/False
+
+            } else if ("MCQ".equalsIgnoreCase(questionType)) {
+
+                marks = 1; // 1 mark for MCQ
+
+            } else if ("FillInTheBlank".equalsIgnoreCase(questionType) || "FillInTheWord".equalsIgnoreCase(questionType)) {
+
+                marks = 1; // 1 mark for Fill in the missing word
+
+            } else {
+
+                marks = 1; // Default 1 mark for other types
+
+            }
         }
 
 
 
         // Handle different question types
 
-        if ("DRAG_AND_DROP".equalsIgnoreCase(questionType) || "REARRANGE".equalsIgnoreCase(questionType) || "RE_ARRANGE".equalsIgnoreCase(questionType)) {
+        if ("DRAG_AND_DROP".equalsIgnoreCase(questionType) || "REARRANGE".equalsIgnoreCase(questionType) || "RE_ARRANGE".equalsIgnoreCase(questionType) || "PARAGRAPH".equalsIgnoreCase(questionType)) {
 
-            // For drag-and-drop or rearrange questions, insert empty strings for opt fields since they're required
+            // For drag-and-drop, rearrange, or paragraph questions, insert empty strings for opt fields since they're required
 
             sql = "INSERT INTO questions (question, opt1, opt2, opt3, opt4, correct, course_name, question_type, image_path, marks, extra_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -2720,7 +2726,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(2, ""); // opt1 - empty
 
-            pstm.setString(3, ""); // opt2 - empty
+            pstm.setString(3, ""); // opt2 - empty (NOT NULL in schema)
 
             pstm.setString(4, ""); // opt3 - empty
 
@@ -2734,7 +2740,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(9, imagePath);
 
-            pstm.setInt(10, marks);
+            pstm.setFloat(10, marks);
 
             pstm.setString(11, extraData);
 
@@ -2748,7 +2754,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(2, "True");  // Hardcoded options for True/False
 
-            pstm.setString(3, "False");
+            pstm.setString(3, "False"); // opt2 is NOT NULL
 
             pstm.setString(4, correctAnswer);
 
@@ -2758,7 +2764,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(7, imagePath);
 
-            pstm.setInt(8, marks);
+            pstm.setFloat(8, marks);
 
             pstm.setString(9, extraData);
 
@@ -2774,7 +2780,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(2, opt1);
 
-            pstm.setString(3, opt2);
+            pstm.setString(3, (opt2 == null || opt2.isEmpty()) ? "" : opt2); // opt2 is NOT NULL
 
             pstm.setString(4, opt3);
 
@@ -2788,7 +2794,7 @@ public int addNewQuestionReturnId(String questionText, String opt1, String opt2,
 
             pstm.setString(9, imagePath);
 
-            pstm.setInt(10, marks);
+            pstm.setFloat(10, marks);
 
             pstm.setString(11, extraData);
 
@@ -3464,7 +3470,7 @@ public Questions getQuestionById(int questionId) {
 
                 question.setCorrectTargetsJson(rs.getString("drag_correct_targets"));
 
-                question.setTotalMarks(rs.getInt("marks"));
+                question.setTotalMarks(rs.getFloat("marks"));
 
                 
 
@@ -4844,7 +4850,7 @@ public ArrayList getQuestions(String courseName, int questions) {
 
                 question.setCorrectTargetsJson(rs.getString("drag_correct_targets"));
 
-                question.setTotalMarks(rs.getInt("marks"));
+                question.setTotalMarks(rs.getFloat("marks"));
 
             } catch (SQLException sqle) {
 
@@ -5326,7 +5332,7 @@ public ArrayList getAllQuestions(String courseName) {
 
                 question.setCorrectTargetsJson(rs.getString("drag_correct_targets"));
 
-                question.setTotalMarks(rs.getInt("marks"));
+                question.setTotalMarks(rs.getFloat("marks"));
 
             } catch (SQLException sqle) {
 
@@ -5544,7 +5550,7 @@ public ArrayList getAllQuestions(String courseName, String searchTerm, String qu
 
                 question.setCorrectTargetsJson(rs.getString("drag_correct_targets"));
 
-                question.setTotalMarks(rs.getInt("marks"));
+                question.setTotalMarks(rs.getFloat("marks"));
 
             } catch (SQLException sqle) {
 

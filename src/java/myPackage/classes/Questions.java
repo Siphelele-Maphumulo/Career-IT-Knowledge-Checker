@@ -6,7 +6,7 @@ public class Questions {
     private int questionId;
     private String question,opt1,opt2,opt3,opt4,correct,courseName, questionType, imagePath, extraData;
     private String dragItemsJson, dropTargetsJson, correctTargetsJson;
-    private int totalMarks;
+    private float totalMarks;
     private List<DragItem> dragItems;
     private List<DropTarget> dropTargets;
     private List<RearrangeItem> rearrangeItems;
@@ -142,11 +142,11 @@ public class Questions {
         this.extraData = extraData;
     }
     
-    public int getTotalMarks() {
+    public float getTotalMarks() {
         return totalMarks;
     }
     
-    public void setTotalMarks(int totalMarks) {
+    public void setTotalMarks(float totalMarks) {
         this.totalMarks = totalMarks;
     }
 
