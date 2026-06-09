@@ -1,0 +1,203 @@
+package myPackage.classes;
+
+import java.util.List;
+
+public class Questions {
+    private int questionId;
+    private String question,opt1,opt2,opt3,opt4,correct,courseName, questionType, imagePath, extraData;
+    private String dragItemsJson, dropTargetsJson, correctTargetsJson;
+    private int totalMarks;
+    private List<DragItem> dragItems;
+    private List<DropTarget> dropTargets;
+    private List<RearrangeItem> rearrangeItems;
+    private String rearrangeItemsJson;
+
+    public Questions() {
+    }
+
+    public Questions(int questionId, String question, String opt1, String opt2, String opt3, String opt4, String correct, String courseName, String questionType) {
+        this.questionId = questionId;
+        this.question = question;
+        this.opt1 = opt1;
+        this.opt2 = opt2;
+        this.opt3 = opt3;
+        this.opt4 = opt4;
+        this.correct = correct;
+        this.courseName = courseName;
+        this.questionType = questionType;
+    }
+    
+    public Questions(int questionId, String question, String opt1, String opt2, String opt3, String opt4, String correct, String courseName, String questionType, String imagePath) {
+        this.questionId = questionId;
+        this.question = question;
+        this.opt1 = opt1;
+        this.opt2 = opt2;
+        this.opt3 = opt3;
+        this.opt4 = opt4;
+        this.correct = correct;
+        this.courseName = courseName;
+        this.questionType = questionType;
+        this.imagePath = imagePath;
+    }
+
+    public Questions(int questionId, String question, String opt1, String opt2, String opt3, String opt4, String correct, String courseName, String questionType, String imagePath, String extraData) {
+        this.questionId = questionId;
+        this.question = question;
+        this.opt1 = opt1;
+        this.opt2 = opt2;
+        this.opt3 = opt3;
+        this.opt4 = opt4;
+        this.correct = correct;
+        this.courseName = courseName;
+        this.questionType = questionType;
+        this.imagePath = imagePath;
+        this.extraData = extraData;
+    }
+
+    public String getQuestionType() {
+        return questionType;
+    }
+
+    public void setQuestionType(String questionType) {
+        this.questionType = questionType;
+    }
+
+    public int getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public String getOpt1() {
+        return opt1;
+    }
+
+    public void setOpt1(String opt1) {
+        this.opt1 = opt1;
+    }
+
+    public String getOpt2() {
+        return opt2;
+    }
+
+    public void setOpt2(String opt2) {
+        this.opt2 = opt2;
+    }
+
+    public String getOpt3() {
+        return opt3;
+    }
+
+    public void setOpt3(String opt3) {
+        this.opt3 = opt3;
+    }
+
+    public String getOpt4() {
+        return opt4;
+    }
+
+    public void setOpt4(String opt4) {
+        this.opt4 = opt4;
+    }
+
+    public String getCorrect() {
+        return correct;
+    }
+
+    public void setCorrect(String correct) {
+        this.correct = correct;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+    
+    public String getImagePath() {
+        return imagePath;
+    }
+    
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public String getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(String extraData) {
+        this.extraData = extraData;
+    }
+    
+    public int getTotalMarks() {
+        return totalMarks;
+    }
+    
+    public void setTotalMarks(int totalMarks) {
+        this.totalMarks = totalMarks;
+    }
+
+    public String getDragItemsJson() {
+        return dragItemsJson;
+    }
+
+    public void setDragItemsJson(String dragItemsJson) {
+        this.dragItemsJson = dragItemsJson;
+    }
+
+    public String getDropTargetsJson() {
+        return dropTargetsJson;
+    }
+
+    public void setDropTargetsJson(String dropTargetsJson) {
+        this.dropTargetsJson = dropTargetsJson;
+    }
+
+    public String getCorrectTargetsJson() {
+        return correctTargetsJson;
+    }
+
+    public void setCorrectTargetsJson(String correctTargetsJson) {
+        this.correctTargetsJson = correctTargetsJson;
+    }
+    
+    public List<DragItem> getDragItems() {
+        return dragItems;
+    }
+    
+    public void setDragItems(List<DragItem> dragItems) {
+        this.dragItems = dragItems;
+    }
+    
+    public List<DropTarget> getDropTargets() {
+        return dropTargets;
+    }
+    
+    public void setDropTargets(List<DropTarget> dropTargets) {
+        this.dropTargets = dropTargets;
+    }
+    
+    public List<RearrangeItem> getRearrangeItems() { return rearrangeItems; }
+    public void setRearrangeItems(List<RearrangeItem> rearrangeItems) { 
+        this.rearrangeItems = rearrangeItems; 
+    }
+    
+    public String getRearrangeItemsJson() { return rearrangeItemsJson; }
+    public void setRearrangeItemsJson(String rearrangeItemsJson) { 
+        this.rearrangeItemsJson = rearrangeItemsJson; 
+    }
+    
+}

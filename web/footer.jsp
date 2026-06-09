@@ -1,0 +1,225 @@
+<footer class="footer text-white py-3" style="background-color:#09294d;">
+    <div class="container">
+        <div class="row align-items-center">
+            
+            <!-- Left Column: Visit Us Info -->
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="footer-content">
+                    <h5 class="footer-title mb-2" style="color: #FFFFFF; font-size: 1rem;">Visit Us</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                Ground Floor, Centenary Building, 21 Zenith Drive, Umhlanga Ridge
+                            </span>
+                        </li>
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-phone me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                +27 31 566 5588
+                            </span>
+                        </li>
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-envelope me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                <a href="mailto:enquiries@careersit.co.za" class="text-white text-decoration-none">
+                                    enquiries@careersit.co.za
+                                </a>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Center Column: Logo -->
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="footer-logo-container text-center">
+                    <img src="" alt="Logo" class="footer-logo img-fluid" style="max-width: 200px; height: auto;">
+                </div>
+            </div>
+
+            <!-- Right Column: Opening Hours -->
+            <div class="col-md-4">
+                <div class="footer-content">
+                    <h5 class="footer-title mb-2" style="color: #FFFFFF; font-size: 1rem;">Opening Hours</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-clock me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                Week days: 08:00 - 16:30
+                            </span>
+                        </li>
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-clock me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                Saturday: 08:00 - 12:00
+                            </span>
+                        </li>
+                        <li class="footer-item mb-1 d-flex align-items-center">
+                            <i class="fas fa-times-circle me-2" style="color: #FFFFFF; font-size: 0.9rem;"></i>
+                            <span style="font-size: 0.9rem; color: #FFFFFF;">
+                                Sunday & Public Holiday: Closed
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Copyright -->
+        <div class="row mt-3 pt-2 border-top border-secondary">
+            <div class="col-12 text-center">
+                <p class="mb-0" style="color: #CCCCCC; font-size: 0.8rem;">
+                    <i class="far fa-copyright me-1"></i> 
+                    <span id="currentYear"></span> Careers IT. All rights reserved.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</footer>
+
+<style>
+    
+    :root {
+    --primary-blue: #09294d;
+    --secondary-blue: #1a3d6d;
+    --text-white: #ffffff;
+    --text-light: #e0e9ff;
+    --transition-speed: 0.2s;
+}
+    /* Professional Compact Footer Styling */
+    .footer {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .footer-title {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 5px;
+        display: inline-block;
+    }
+
+    .footer-content {
+        padding: 5px 0;
+    }
+
+    .footer-item {
+        line-height: 1.4;
+        transition: all 0.2s ease;
+    }
+
+    .footer-item:hover {
+        transform: translateX(3px);
+    }
+
+    .footer-item i {
+        width: 18px;
+        text-align: center;
+    }
+
+    .footer-logo {
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+        transition: all 0.2s ease;
+    }
+
+    .footer-logo:hover {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    .footer-logo-container {
+        padding: 8px 0;
+    }
+
+    a:hover {
+        color: #4dabf7 !important;
+        text-decoration: underline !important;
+    }
+
+    .border-secondary {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .footer {
+            text-align: center;
+            padding: 1.5rem 0 !important;
+        }
+        
+        .footer-content {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-item {
+            justify-content: center !important;
+        }
+        
+        .footer-logo {
+            max-width: 180px !important;
+        }
+        
+        .footer-title {
+            font-size: 1.1rem !important;
+        }
+        
+        .footer-item span {
+            font-size: 0.95rem !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .footer {
+            padding: 1rem 0 !important;
+        }
+        
+        .footer-logo {
+            max-width: 150px !important;
+        }
+        
+        .row {
+            flex-direction: column;
+        }
+        
+        .col-md-4 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .col-md-4:last-child {
+            margin-bottom: 0;
+        }
+    }
+</style>
+
+<script>
+    // Set current year in copyright
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Add smooth hover effect for footer items
+        const footerItems = document.querySelectorAll('.footer-item');
+        footerItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(3px)';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+        
+        // Add hover effect for links
+        const links = document.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.textDecoration = 'underline';
+            });
+            link.addEventListener('mouseleave', function() {
+                this.style.textDecoration = 'none';
+            });
+        });
+    });
+</script>
