@@ -778,6 +778,7 @@ ArrayList list = (courseName != null) ? pDAO.getAllQuestions(courseName, searchT
                                     <option value="Code" <%= "Code".equalsIgnoreCase(questionTypeFilter) ? "selected" : "" %>>Code Snippet</option>
                                     <option value="DRAG_AND_DROP" <%= "DRAG_AND_DROP".equalsIgnoreCase(questionTypeFilter) ? "selected" : "" %>>Drag & Drop</option>
                                     <option value="REARRANGE" <%= "REARRANGE".equalsIgnoreCase(questionTypeFilter) ? "selected" : "" %>>Rearrange</option>
+                                    <option value="PARAGRAPH" <%= "PARAGRAPH".equalsIgnoreCase(questionTypeFilter) ? "selected" : "" %>>Paragraph</option>
                                 </select>
                                 
                                 <select name="sort" class="filter-select" onchange="this.form.submit()">
@@ -841,6 +842,7 @@ ArrayList list = (courseName != null) ? pDAO.getAllQuestions(courseName, searchT
                         boolean isRearrange = "REARRANGE".equals(qType);
                         boolean isFIB = "FillInTheBlank".equalsIgnoreCase(qType);
                         boolean isMS = "MultipleSelect".equals(qType);
+                        boolean isPara = "PARAGRAPH".equalsIgnoreCase(qType);
                         String[] correctAns = isMS ? q.getCorrect().split("\\|") : new String[]{q.getCorrect()};
                     %>
                         <div class="question-card">
@@ -958,6 +960,34 @@ ArrayList list = (courseName != null) ? pDAO.getAllQuestions(courseName, searchT
                                             <% } %>
                                         </div>
                                     </div>
+                                <% } else if (isPara) {
+                                    int minWords = 0;
+                                    int maxWords = 0;
+                                    try {
+                                        if (q.getExtraData() != null) {
+                                            JSONObject extra = new JSONObject(q.getExtraData());
+                                            minWords = extra.optInt("minWords", 0);
+                                            maxWords = extra.optInt("maxWords", 0);
+                                        }
+                                    } catch(Exception e) {}
+                                %>
+                                    <div class="dd-preview" style="border-left: 4px solid var(--warning);">
+                                        <h4><i class="fas fa-paragraph"></i> Paragraph Question Details</h4>
+                                        <div style="display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap;">
+                                            <div class="stats-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                                                <i class="fas fa-file-alt"></i> Min Words: <%= minWords > 0 ? minWords : "No limit" %>
+                                            </div>
+                                            <div class="stats-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                                                <i class="fas fa-file-word"></i> Max Words: <%= maxWords > 0 ? maxWords : "No limit" %>
+                                            </div>
+                                            <div class="stats-badge" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;">
+                                                <i class="fas fa-star"></i> Marks: <%= q.getTotalMarks() %>
+                                            </div>
+                                        </div>
+                                        <div class="alert" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; margin-bottom: 0; padding: 10px; border-radius: 4px;">
+                                            <i class="fas fa-info-circle"></i> This question requires manual marking in the Results section.
+                                        </div>
+                                    </div>
                                 <% } else { %>
 
                                     <div class="options-grid">
@@ -986,6 +1016,8 @@ ArrayList list = (courseName != null) ? pDAO.getAllQuestions(courseName, searchT
                                 <div class="qid-info">ID: #<%= q.getQuestionId() %> | Course: <%= courseName %></div>
                                 <% if (isMS) { %>
                                     <span class="q-type-label" style="background: #e0f2fe; color: #0369a1;">Multiple Select</span>
+                                <% } else if (isPara) { %>
+                                    <span class="q-type-label" style="background: #fef3c7; color: #92400e;">Paragraph / Short Answer</span>
                                 <% } %>
                             </div>
                         </div>

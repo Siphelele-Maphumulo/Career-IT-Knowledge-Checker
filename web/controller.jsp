@@ -1239,6 +1239,9 @@ try {
                 String questionType = "";
                 String correctMultiple = "";
                 String orientation = "horizontal";
+                String minWords = "";
+                String maxWords = "";
+                Integer marksOverride = null;
                 String imagePath = null;
                 boolean isAjax = false;
                 
@@ -1270,6 +1273,12 @@ try {
                             correctMultiple = nz(fieldValue, "");
                         } else if ("orientation".equals(fieldName)) {
                             orientation = fieldValue;
+                        } else if ("minWords".equals(fieldName)) {
+                            minWords = nz(fieldValue, "");
+                        } else if ("maxWords".equals(fieldName)) {
+                            maxWords = nz(fieldValue, "");
+                        } else if ("paragraphMarks".equals(fieldName)) {
+                            try { marksOverride = Integer.parseInt(fieldValue.trim()); } catch(Exception e) {}
                         }
         } else {
                         // Process file upload field - ONLY ACCEPT IMAGES
@@ -1337,10 +1346,15 @@ try {
                     JSONObject extraDataObj = new JSONObject();
                     extraDataObj.put("orientation", orientation);
                     extraData = extraDataObj.toString();
+                } else if ("PARAGRAPH".equalsIgnoreCase(questionType)) {
+                    JSONObject extraDataObj = new JSONObject();
+                    if (!minWords.isEmpty()) extraDataObj.put("minWords", minWords);
+                    if (!maxWords.isEmpty()) extraDataObj.put("maxWords", maxWords);
+                    extraData = extraDataObj.toString();
                 }
                 
                 // Insert question FIRST and capture new question ID
-                int newQuestionIdInserted = pDAO.addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, imagePath, extraData);
+                int newQuestionIdInserted = pDAO.addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, imagePath, extraData, marksOverride);
                 
                 application.log("=== AFTER QUESTION INSERT ===");
                 application.log("Question Type: " + questionType);
@@ -1541,6 +1555,14 @@ try {
             String courseName    = nz(request.getParameter("coursename"), "");
             String questionType  = nz(request.getParameter("questionType"), "");
             String orientation   = nz(request.getParameter("orientation"), "horizontal");
+            String minWords      = nz(request.getParameter("minWords"), "");
+            String maxWords      = nz(request.getParameter("maxWords"), "");
+            Integer marksOverride = null;
+            try {
+                String pm = request.getParameter("paragraphMarks");
+                if (pm != null) marksOverride = Integer.parseInt(pm);
+            } catch(Exception e) {}
+
             boolean isAjax = "true".equalsIgnoreCase(request.getParameter("ajax"));
             
             if ("MultipleSelect".equalsIgnoreCase(questionType)) {
@@ -1553,9 +1575,14 @@ try {
                 JSONObject extraDataObj = new JSONObject();
                 extraDataObj.put("orientation", orientation);
                 extraData = extraDataObj.toString();
+            } else if ("PARAGRAPH".equalsIgnoreCase(questionType)) {
+                JSONObject extraDataObj = new JSONObject();
+                if (!minWords.isEmpty()) extraDataObj.put("minWords", minWords);
+                if (!maxWords.isEmpty()) extraDataObj.put("maxWords", maxWords);
+                extraData = extraDataObj.toString();
             }
             
-            int newQuestionIdInserted = pDAO.addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, null, extraData);
+            int newQuestionIdInserted = pDAO.addNewQuestionReturnId(questionText, opt1, opt2, opt3, opt4, correctAnswer, courseName, questionType, null, extraData, marksOverride);
             
             // Save drag and drop data using proper relational tables for DRAG_AND_DROP type
             if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
