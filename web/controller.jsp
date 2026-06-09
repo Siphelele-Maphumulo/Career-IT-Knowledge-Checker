@@ -2148,6 +2148,9 @@ try {
                                 application.log("Error processing rearrange JSON for Q" + qid + ": " + e.getMessage());
                             }
                         }
+                    } else if ("paragraph".equalsIgnoreCase(qtype) || "PARAGRAPH".equalsIgnoreCase(qtype)) {
+                        // Handle paragraph questions
+                        pDAO.insertParagraphAnswer(eId, qid, question, ans, userId);
                     }
                     
                     pDAO.insertAnswer(eId, qid, question, ans);
@@ -2565,6 +2568,25 @@ try {
         request.getRequestDispatcher("transition.jsp").forward(request, response);
         return;
         
+    } else if ("grade_paragraph".equalsIgnoreCase(pageParam)) {
+        try {
+            int answerId = Integer.parseInt(nz(request.getParameter("answerId"), "0"));
+            float marks = Float.parseFloat(nz(request.getParameter("marks"), "0"));
+            String feedback = nz(request.getParameter("feedback"), "");
+            int examId = Integer.parseInt(nz(request.getParameter("examId"), "0"));
+
+            boolean success = pDAO.gradeParagraphAnswer(answerId, marks, feedback);
+            if (success) {
+                session.setAttribute("message", "Paragraph answer graded successfully!");
+            } else {
+                session.setAttribute("error", "Failed to grade paragraph answer.");
+            }
+            response.sendRedirect("grade-paragraphs.jsp?examId=" + examId);
+        } catch (Exception e) {
+            session.setAttribute("error", "Error grading: " + e.getMessage());
+            response.sendRedirect("adm-page.jsp?pgprt=5");
+        }
+
     } else if ("proctoring".equalsIgnoreCase(pageParam)) {
         String operation = nz(request.getParameter("operation"), "");
         int examId = Integer.parseInt(nz(request.getParameter("examId"), "0"));

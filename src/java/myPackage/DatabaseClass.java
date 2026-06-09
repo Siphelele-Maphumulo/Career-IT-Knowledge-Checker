@@ -5702,6 +5702,179 @@ public ArrayList getAllQuestions(String courseName, String searchTerm, String qu
 
     }
 
+    // Insert paragraph answer (separate table or with status for manual grading)
+    public void insertParagraphAnswer(int examId, int questionId, String question, String answer, int studentId) {
+        Connection conn = null;
+        PreparedStatement pstm = null;
+
+        try {
+            conn = getConnection();
+
+            // Get max marks for this question
+            float maxMarks = 0;
+            String marksSql = "SELECT marks FROM questions WHERE question_id = ?";
+            try (PreparedStatement mpstm = conn.prepareStatement(marksSql)) {
+                mpstm.setInt(1, questionId);
+                try (ResultSet rs = mpstm.executeQuery()) {
+                    if (rs.next()) {
+                        maxMarks = rs.getFloat("marks");
+                    }
+                }
+            }
+
+            // Delete any existing paragraph answer for this exam/question
+            String deleteSql = "DELETE FROM paragraph_answers WHERE exam_id = ? AND question_id = ? AND student_id = ?";
+            try (PreparedStatement dpstm = conn.prepareStatement(deleteSql)) {
+                dpstm.setInt(1, examId);
+                dpstm.setInt(2, questionId);
+                dpstm.setInt(3, studentId);
+                dpstm.executeUpdate();
+            }
+
+            // Insert paragraph answer
+            String sql = "INSERT INTO paragraph_answers (exam_id, question_id, question, student_answer, student_id, max_marks, status, submitted_at) VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, examId);
+            pstm.setInt(2, questionId);
+            pstm.setString(3, question);
+            pstm.setString(4, answer != null ? answer.trim() : "");
+            pstm.setInt(5, studentId);
+            pstm.setFloat(6, maxMarks);
+            pstm.executeUpdate();
+
+            LOGGER.info("Paragraph answer saved for exam: " + examId + ", question: " + questionId);
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error inserting paragraph answer", e);
+        } finally {
+            try { if (pstm != null) pstm.close(); } catch (SQLException e) {}
+        }
+    }
+
+    // Get pending paragraph answers for manual grading
+    public ArrayList<Map<String, Object>> getPendingParagraphAnswers(int examId) {
+        ArrayList<Map<String, Object>> answers = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            String sql = "SELECT pa.*, u.first_name, u.last_name, u.email, q.marks as max_marks " +
+                         "FROM paragraph_answers pa " +
+                         "JOIN users u ON pa.student_id = u.user_id " +
+                         "JOIN questions q ON pa.question_id = q.question_id " +
+                         "WHERE pa.exam_id = ? AND pa.status = 'pending' " +
+                         "ORDER BY pa.submitted_at";
+            pstm = conn.prepareStatement(sql);
+            pstm.setInt(1, examId);
+            rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> answer = new HashMap<>();
+                answer.put("id", rs.getInt("id"));
+                answer.put("exam_id", rs.getInt("exam_id"));
+                answer.put("question_id", rs.getInt("question_id"));
+                answer.put("question", rs.getString("question"));
+                answer.put("student_answer", rs.getString("student_answer"));
+                answer.put("student_name", rs.getString("first_name") + " " + rs.getString("last_name"));
+                answer.put("student_email", rs.getString("email"));
+                answer.put("max_marks", rs.getFloat("max_marks"));
+                answer.put("status", rs.getString("status"));
+                answer.put("submitted_at", rs.getString("submitted_at"));
+                answers.add(answer);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting pending paragraph answers", e);
+        } finally {
+            try { if (rs != null) rs.close(); if (pstm != null) pstm.close(); } catch (SQLException e) {}
+        }
+        return answers;
+    }
+
+    // Grade a paragraph answer
+    public boolean gradeParagraphAnswer(int answerId, float marksObtained, String feedback) {
+        Connection conn = null;
+        PreparedStatement pstm = null;
+
+        try {
+            conn = getConnection();
+            String sql = "UPDATE paragraph_answers SET marks_obtained = ?, status = 'graded', feedback = ?, graded_at = NOW() WHERE id = ?";
+            pstm = conn.prepareStatement(sql);
+            pstm.setFloat(1, marksObtained);
+            pstm.setString(2, feedback != null ? feedback : "");
+            pstm.setInt(3, answerId);
+
+            int updated = pstm.executeUpdate();
+
+            if (updated > 0) {
+                // Get exam_id and student_id to update overall exam marks
+                String getInfoSql = "SELECT exam_id, student_id, question_id FROM paragraph_answers WHERE id = ?";
+                try (PreparedStatement gpstm = conn.prepareStatement(getInfoSql)) {
+                    gpstm.setInt(1, answerId);
+                    try (ResultSet rs = gpstm.executeQuery()) {
+                        if (rs.next()) {
+                            int examId = rs.getInt("exam_id");
+                            int studentId = rs.getInt("student_id");
+                            int questionId = rs.getInt("question_id");
+
+                            // Update the main answers table for consistency
+                            // NOTE: Using partial:X pattern since answers table doesn't have marks_obtained column
+                            String updateAnswerSql = "UPDATE answers SET status = ? WHERE exam_id = ? AND question_id = ?";
+                            try (PreparedStatement apstm = conn.prepareStatement(updateAnswerSql)) {
+                                apstm.setString(1, "partial:" + marksObtained);
+                                apstm.setInt(2, examId);
+                                apstm.setInt(3, questionId);
+                                apstm.executeUpdate();
+                            }
+
+                            // Recalculate total marks for this exam
+                            recalculateExamMarks(examId);
+                        }
+                    }
+                }
+            }
+
+            return updated > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error grading paragraph answer", e);
+            return false;
+        } finally {
+            try { if (pstm != null) pstm.close(); } catch (SQLException e) {}
+        }
+    }
+
+    // Recalculate total marks for an exam
+    public void recalculateExamMarks(int examId) {
+        Connection conn = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+
+            // Use getRawMarks to get the correct totals
+            float[] marks = getRawMarks(examId);
+            float totalObtained = marks[0];
+            float totalPossible = marks[1];
+
+            // Update the exam with recalculated marks
+            String updateSql = "UPDATE exams SET obt_marks = ?, total_marks = ? WHERE exam_id = ?";
+            pstm = conn.prepareStatement(updateSql);
+            pstm.setFloat(1, totalObtained);
+            pstm.setFloat(2, totalPossible);
+            pstm.setInt(3, examId);
+            pstm.executeUpdate();
+
+            LOGGER.info("Recalculated exam " + examId + " marks: " + totalObtained + "/" + totalPossible);
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error recalculating exam marks", e);
+        } finally {
+            try { if (rs != null) rs.close(); if (pstm != null) pstm.close(); } catch (SQLException e) {}
+        }
+    }
+
     
 
     private  String getFormatedDate(String date){
@@ -7827,10 +8000,12 @@ public float[] getRawMarks(int examId) {
         }
 
         // 2. Get obtained marks from the answers table - Single source of truth
+        // NOTE: We exclude PARAGRAPH questions here because they are graded manually
+        // and we will add their marks from the paragraph_answers table below.
         String sql = "SELECT a.status, q.marks, q.question_type " +
                     "FROM answers a " +
                     "JOIN questions q ON a.question_id = q.question_id " +
-                    "WHERE a.exam_id = ? " +
+                    "WHERE a.exam_id = ? AND q.question_type != 'PARAGRAPH' " +
                     "GROUP BY q.question_id, a.status, q.marks, q.question_type";
 
         try (PreparedStatement pstm = conn.prepareStatement(sql)) {
@@ -7851,6 +8026,17 @@ public float[] getRawMarks(int examId) {
                             LOGGER.log(Level.WARNING, "Error parsing partial marks: " + status);
                         }
                     }
+                }
+            }
+        }
+
+        // Get obtained marks from graded paragraph answers
+        String paraSql = "SELECT marks_obtained FROM paragraph_answers WHERE exam_id = ? AND status = 'graded'";
+        try (PreparedStatement pstm = conn.prepareStatement(paraSql)) {
+            pstm.setInt(1, examId);
+            try (ResultSet rs = pstm.executeQuery()) {
+                while (rs.next()) {
+                    totalObtainedMarks += rs.getFloat("marks_obtained");
                 }
             }
         }

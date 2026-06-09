@@ -223,6 +223,7 @@
                     boolean isMultiTwo = false;
                     boolean isDragDrop = false;
                     boolean isRearrange = false;
+                    boolean isParagraph = false;
                     try{
                         String qt = q.getQuestion().toLowerCase();
                         String questionType = q.getQuestionType();
@@ -233,6 +234,7 @@
                                     qt.contains("select multiple") || qt.contains("choose multiple");
                         isDragDrop = "DRAG_AND_DROP".equalsIgnoreCase(questionType);
                         isRearrange = "REARRANGE".equalsIgnoreCase(questionType);
+                        isParagraph = "PARAGRAPH".equalsIgnoreCase(questionType);
                     } catch(Exception e) { 
                         isMultiTwo = false; 
                         isDragDrop = false;
@@ -434,6 +436,19 @@
                                     </div>
                                     <input type="hidden" name="rearrangeQuestion_<%= i %>" value="true">
                                 </div>
+                            <% } else if(isParagraph) { %>
+                                <div class="paragraph-question">
+                                    <div class="form-group">
+                                        <label class="form-label">Your Answer:</label>
+                                        <textarea name="question<%= i %>"
+                                                  id="question<%= i %>"
+                                                  class="form-control paragraph-input answer-input"
+                                                  rows="6"
+                                                  data-qindex="<%= i %>"
+                                                  placeholder="Type your detailed answer here..."
+                                                  oninput="dirty=true; updateProgress();"></textarea>
+                                    </div>
+                                </div>
                             <% } else { %>
                                 <% if(isMultiTwo){ %>
                                     <div class="multi-select-note"><i class="fas fa-check-double"></i><strong>Choose up to 2 answers</strong></div>
@@ -459,7 +474,7 @@
                         </div>
                         <input type="hidden" name="qtext<%= i %>" value="<%= q.getQuestion() %>">
                         <input type="hidden" name="qid<%= i %>" value="<%= q.getQuestionId() %>">
-                        <input type="hidden" name="qtype<%= i %>" value="<%= isDragDrop?"dragdrop":(isRearrange?"rearrange":(isMultiTwo?"multi2":"single")) %>">
+                        <input type="hidden" name="qtype<%= i %>" value="<%= isDragDrop?"dragdrop":(isRearrange?"rearrange":(isParagraph?"paragraph":(isMultiTwo?"multi2":"single"))) %>">
                     </div>
                 <% } %>
                 </div>
