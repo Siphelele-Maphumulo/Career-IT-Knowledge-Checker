@@ -1614,6 +1614,7 @@ function updateProgress() {
         const qindex = card.getAttribute('data-qindex');
         const isDragDrop = card.querySelector('.drag-drop-question') !== null;
         const isRearrange = card.querySelector('.rearrange-question') !== null;
+        const paragraphTextarea = card.querySelector('textarea.paragraph-input');
         
         if (isDragDrop) {
             // Question is answered if at least one target has an item
@@ -1624,6 +1625,11 @@ function updateProgress() {
             // For rearrange questions, check if items exist in the list
             const list = card.querySelector('.rearrange-items-list');
             if (list && list.querySelectorAll('.rearrange-item').length > 0) {
+                answered++;
+            }
+        } else if (paragraphTextarea) {
+            // For paragraph questions, check if textarea is not empty
+            if (paragraphTextarea.value.trim() !== '') {
                 answered++;
             }
         } else {

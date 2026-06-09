@@ -1125,6 +1125,10 @@ public String escapeHtml(String input) {
                                         <i class="fas fa-eye"></i><span>Details</span>
                                     </a>
 
+                                    <a class="btn btn-warning action-btn" href="grade-paragraphs.jsp?examId=<%= examId %>" title="Grade Paragraphs">
+                                        <i class="fas fa-pen-nib"></i><span>Grade</span>
+                                    </a>
+
                                      <% if (currentUser.getType().equalsIgnoreCase("admin")) { %>
                                      <button class="btn btn-danger action-btn delete-btn single-delete-btn"
                                             type="button"
