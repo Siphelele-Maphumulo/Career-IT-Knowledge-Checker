@@ -17,6 +17,7 @@
 <%@ page import="myPackage.*" %>
 <%@ page import="myPackage.classes.User" %>
 <%@ page import="myPackage.classes.Questions" %>
+<%@ page import="myPackage.classes.Exams" %>
 <%@ page import="org.mindrot.jbcrypt.BCrypt" %>
 <%@ page import="org.json.JSONObject" %>
 <%@ page import="org.json.JSONArray" %>
@@ -154,6 +155,32 @@ try {
             response.getWriter().write("{\"success\": true, \"fullName\": \"" + fullName + "\"}");
         } else {
             response.getWriter().write("{\"success\": false}");
+        }
+        return;
+
+    } else if ("update_manual_mark".equalsIgnoreCase(pageParam)) {
+        try {
+            int examId = Integer.parseInt(request.getParameter("examId"));
+            int questionId = Integer.parseInt(request.getParameter("questionId"));
+            float marks = Float.parseFloat(request.getParameter("marks"));
+            String feedback = nz(request.getParameter("feedback"), "");
+
+            boolean success = pDAO.updateManualMark(examId, questionId, marks, feedback);
+            if (success) {
+                // Recalculate the overall exam results
+                Exams exam = pDAO.getResultByExamId(examId);
+                if (exam != null) {
+                    pDAO.calculateResult(examId, exam.gettMarks(), exam.getEndTime(), 0);
+                }
+                response.setContentType("application/json");
+                response.getWriter().write("{\"success\": true}");
+            } else {
+                response.setContentType("application/json");
+                response.getWriter().write("{\"success\": false, \"message\": \"Failed to update marks\"}");
+            }
+        } catch (Exception e) {
+            response.setContentType("application/json");
+            response.getWriter().write("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         }
         return;
 
@@ -779,6 +806,7 @@ try {
                         String currentImagePath = "";
                         boolean removeImage = false;
                         String imagePath = null;
+                        String extraData = null;
                         
                         for (FileItem item : items) {
                             if (item.isFormField()) {
@@ -806,6 +834,8 @@ try {
                                     currentImagePath = nz(fieldValue, "");
                                 } else if ("removeImage".equals(fieldName)) {
                                     removeImage = "true".equals(fieldValue);
+                                } else if ("paragraphMarks".equals(fieldName)) {
+                                    extraData = fieldValue;
                                 }
         } else {
                                 // Process file upload field - ONLY ACCEPT IMAGES
@@ -1036,6 +1066,9 @@ try {
                             return;
                         }
                         
+                        if (extraData != null) {
+                            question.setExtraData(extraData);
+                        }
                         pDAO.updateQuestion(question);
 
                         if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
@@ -1239,6 +1272,7 @@ try {
                 String questionType = "";
                 String correctMultiple = "";
                 String orientation = "horizontal";
+                String extraData = null;
                 String imagePath = null;
                 boolean isAjax = false;
                 
@@ -1270,6 +1304,8 @@ try {
                             correctMultiple = nz(fieldValue, "");
                         } else if ("orientation".equals(fieldName)) {
                             orientation = fieldValue;
+                        } else if ("paragraphMarks".equals(fieldName)) {
+                            extraData = fieldValue;
                         }
         } else {
                         // Process file upload field - ONLY ACCEPT IMAGES
@@ -1332,8 +1368,7 @@ try {
                     if (!correctMultiple.isEmpty()) correctAnswer = correctMultiple;
                 }
                 
-                String extraData = null;
-                if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
+                if (extraData == null && "DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
                     JSONObject extraDataObj = new JSONObject();
                     extraDataObj.put("orientation", orientation);
                     extraData = extraDataObj.toString();

@@ -7790,6 +7790,35 @@ public ArrayList<Exams> getAllExamsAdmin() {
 }
 
 
+public boolean updateManualMark(int examId, int questionId, float marks, String feedback) {
+    try {
+        ensureConnection();
+
+        // 1. Update answers table for calculation logic
+        String sql1 = "UPDATE answers SET status = ? WHERE exam_id = ? AND question_id = ?";
+        try (PreparedStatement pstm1 = conn.prepareStatement(sql1)) {
+            pstm1.setString(1, "partial:" + marks);
+            pstm1.setInt(2, examId);
+            pstm1.setInt(3, questionId);
+            pstm1.executeUpdate();
+        }
+
+        // 2. Update paragraph_answers table for record keeping
+        String sql2 = "UPDATE paragraph_answers SET marks_obtained = ?, feedback = ?, status = 'MARKED', marked_date = NOW() WHERE exam_id = ? AND question_id = ?";
+        try (PreparedStatement pstm2 = conn.prepareStatement(sql2)) {
+            pstm2.setFloat(1, marks);
+            pstm2.setString(2, feedback);
+            pstm2.setInt(3, examId);
+            pstm2.setInt(4, questionId);
+            int rows = pstm2.executeUpdate();
+            return rows > 0;
+        }
+    } catch (SQLException e) {
+        LOGGER.log(Level.SEVERE, "Error in updateManualMark", e);
+        return false;
+    }
+}
+
 public float[] getRawMarks(int examId) {
     try {
         ensureConnection();
