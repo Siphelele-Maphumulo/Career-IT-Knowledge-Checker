@@ -1238,6 +1238,9 @@ try {
                 String courseName = "";
                 String questionType = "";
                 String correctMultiple = "";
+                String paragraphMarksParam = "";
+                String minWords = "";
+                String maxWords = "";
                 String orientation = "horizontal";
                 String imagePath = null;
                 boolean isAjax = false;
@@ -1268,6 +1271,12 @@ try {
                             questionType = nz(fieldValue, "");
                         } else if ("correctMultiple".equals(fieldName)) {
                             correctMultiple = nz(fieldValue, "");
+                        } else if ("paragraphMarks".equals(fieldName)) {
+                            paragraphMarksParam = nz(fieldValue, "");
+                        } else if ("minWords".equals(fieldName)) {
+                            minWords = nz(fieldValue, "");
+                        } else if ("maxWords".equals(fieldName)) {
+                            maxWords = nz(fieldValue, "");
                         } else if ("orientation".equals(fieldName)) {
                             orientation = fieldValue;
                         }
@@ -1333,7 +1342,41 @@ try {
                 }
                 
                 String extraData = null;
-                if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
+                if ("PARAGRAPH".equalsIgnoreCase(questionType)) {
+                    opt1 = "";
+                    opt2 = "";
+                    opt3 = "";
+                    opt4 = "";
+                    correctAnswer = "";
+
+                    int paragraphMarks = 1;
+                    if (!paragraphMarksParam.trim().isEmpty()) {
+                        try {
+                            paragraphMarks = Integer.parseInt(paragraphMarksParam.trim());
+                        } catch (NumberFormatException e) {
+                            application.log("Invalid paragraphMarks value: " + paragraphMarksParam + ", using default 1");
+                        }
+                    }
+
+                    JSONObject extraDataObj = new JSONObject();
+                    if (!minWords.isEmpty()) {
+                        try {
+                            extraDataObj.put("min_words", Integer.parseInt(minWords));
+                        } catch (NumberFormatException e) {
+                            application.log("Invalid minWords value: " + minWords);
+                        }
+                    }
+                    if (!maxWords.isEmpty()) {
+                        try {
+                            extraDataObj.put("max_words", Integer.parseInt(maxWords));
+                        } catch (NumberFormatException e) {
+                            application.log("Invalid maxWords value: " + maxWords);
+                        }
+                    }
+                    extraDataObj.put("type", "paragraph");
+                    extraDataObj.put("paragraph_marks", paragraphMarks);
+                    extraData = extraDataObj.toString();
+                } else if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
                     JSONObject extraDataObj = new JSONObject();
                     extraDataObj.put("orientation", orientation);
                     extraData = extraDataObj.toString();
@@ -1540,6 +1583,9 @@ try {
             String correctAnswer = nz(request.getParameter("correct"), "");
             String courseName    = nz(request.getParameter("coursename"), "");
             String questionType  = nz(request.getParameter("questionType"), "");
+            String paragraphMarksParam = nz(request.getParameter("paragraphMarks"), "");
+            String minWords      = nz(request.getParameter("minWords"), "");
+            String maxWords      = nz(request.getParameter("maxWords"), "");
             String orientation   = nz(request.getParameter("orientation"), "horizontal");
             boolean isAjax = "true".equalsIgnoreCase(request.getParameter("ajax"));
             
@@ -1549,7 +1595,41 @@ try {
             }
             
             String extraData = null;
-            if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
+            if ("PARAGRAPH".equalsIgnoreCase(questionType)) {
+                opt1 = "";
+                opt2 = "";
+                opt3 = "";
+                opt4 = "";
+                correctAnswer = "";
+                
+                int paragraphMarks = 1;
+                if (!paragraphMarksParam.trim().isEmpty()) {
+                    try {
+                        paragraphMarks = Integer.parseInt(paragraphMarksParam.trim());
+                    } catch (NumberFormatException e) {
+                        application.log("Invalid paragraphMarks value: " + paragraphMarksParam + ", using default 1");
+                    }
+                }
+
+                JSONObject extraDataObj = new JSONObject();
+                if (!minWords.isEmpty()) {
+                    try {
+                        extraDataObj.put("min_words", Integer.parseInt(minWords));
+                    } catch (NumberFormatException e) {
+                        application.log("Invalid minWords value: " + minWords);
+                    }
+                }
+                if (!maxWords.isEmpty()) {
+                    try {
+                        extraDataObj.put("max_words", Integer.parseInt(maxWords));
+                    } catch (NumberFormatException e) {
+                        application.log("Invalid maxWords value: " + maxWords);
+                    }
+                }
+                extraDataObj.put("type", "paragraph");
+                extraDataObj.put("paragraph_marks", paragraphMarks);
+                extraData = extraDataObj.toString();
+            } else if ("DRAG_AND_DROP".equalsIgnoreCase(questionType)) {
                 JSONObject extraDataObj = new JSONObject();
                 extraDataObj.put("orientation", orientation);
                 extraData = extraDataObj.toString();

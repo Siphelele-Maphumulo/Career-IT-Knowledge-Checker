@@ -499,10 +499,47 @@
         margin-top: var(--spacing-md);
     }
     
-    .multi-select-note {
-        background: #eff6ff;
-        padding: var(--spacing-sm) var(--spacing-md);
+    .paragraph-input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: var(--spacing-md);
+    }
+
+    .paragraph-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 14px;
+    }
+
+    .paragraph-input {
+        width: 100%;
+        min-height: 140px;
+        padding: 14px;
+        border: 1px solid var(--medium-gray);
         border-radius: var(--radius-sm);
+        background: var(--white);
+        resize: vertical;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--text-dark);
+    }
+
+    .paragraph-input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+    }
+
+    .paragraph-note {
+        font-size: 13px;
+        color: var(--dark-gray);
+        background: #f8f9fa;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid #e2e8f0;
+    }
+
         margin-bottom: var(--spacing-md);
         border-left: 3px solid var(--accent-blue);
         display: flex;
@@ -1764,6 +1801,8 @@
                 <div class="questions-container">
                 <% for (int i=0; i<totalQ; i++){
                     Questions q = questionsList.get(i);
+                    String questionType = q.getQuestionType() != null ? q.getQuestionType().trim() : "";
+                    boolean isParagraph = "PARAGRAPH".equalsIgnoreCase(questionType);
                     boolean isMultiTwo = false;
                     try{
                         String qt = q.getQuestion().toLowerCase();
@@ -1822,9 +1861,10 @@
                             <% if(isMultiTwo){ %>
                                 <div class="multi-select-note"><i class="fas fa-check-double"></i><strong>Choose up to 2 answers</strong></div>
                             <% } %>
-                            <% for(int oi=0; oi<opts.size(); oi++){
-                                String optVal = opts.get(oi);
-                                String inputId = "q"+i+"o"+(oi+1);
+                            <% if (!isParagraph) {
+                                   for(int oi=0; oi<opts.size(); oi++){
+                                       String optVal = opts.get(oi);
+                                       String inputId = "q"+i+"o"+(oi+1);
                             %>
                                 <div class="form-check">
                                     <input class="form-check-input answer-input <%= isMultiTwo?"multi":"single" %>" 
@@ -1835,14 +1875,26 @@
                                         data-qindex="<%= i %>">
                                     <label class="form-check-label" for="<%= inputId %>"><%= optVal %></label>
                                 </div>
-                            <% } %>
-                            <% if(isMultiTwo){ %>
+                            <%     }
+                                   if(isMultiTwo){ %>
                                 <input type="hidden" id="ans<%= i %>-hidden" name="ans<%= i %>" value="">
+                            <%   }
+                               } else { %>
+                                <div class="paragraph-input-wrapper">
+                                    <label class="form-label paragraph-label" for="ans<%= i %>">Your Answer</label>
+                                    <textarea class="form-control paragraph-input answer-input" 
+                                        id="ans<%= i %>" 
+                                        name="ans<%= i %>" 
+                                        data-qindex="<%= i %>" 
+                                        rows="6" 
+                                        placeholder="Type your paragraph answer here..."></textarea>
+                                    <div class="paragraph-note">This response will be recorded and reviewed manually after submission.</div>
+                                </div>
                             <% } %>
                         </div>
                         <input type="hidden" name="question<%= i %>" value="<%= q.getQuestion() %>">
                         <input type="hidden" name="qid<%= i %>" value="<%= q.getQuestionId() %>">
-                        <input type="hidden" name="qtype<%= i %>" value="<%= isMultiTwo?"multi2":"single" %>">
+                        <input type="hidden" name="qtype<%= i %>" value="<%= isParagraph ? "PARAGRAPH" : (isMultiTwo?"multi2":"single") %>">
                     </div>
                 <% } %>
                 </div>
@@ -1996,6 +2048,14 @@
                         var box = card.querySelector('.answers');
                         if(!box) return;
                         
+                        var paragraphInput = card.querySelector('.paragraph-input');
+                        if(paragraphInput) {
+                            if(paragraphInput.value.trim().length > 0) {
+                                answered++;
+                            }
+                            return;
+                        }
+
                         var maxSel = parseInt(box.getAttribute('data-max-select') || '1', 10);
                         if(maxSel === 1){
                             if(box.querySelector('input.single:checked')) answered++;
@@ -2167,6 +2227,14 @@
                     var answeredQuestions = 0;
                     
                     document.querySelectorAll('.question-card').forEach(function(card){
+                        var paragraphInput = card.querySelector('.paragraph-input');
+                        if(paragraphInput) {
+                            if(paragraphInput.value.trim().length > 0) {
+                                answeredQuestions++;
+                            }
+                            return;
+                        }
+
                         var box = card.querySelector('.answers');
                         if(!box) return;
                         

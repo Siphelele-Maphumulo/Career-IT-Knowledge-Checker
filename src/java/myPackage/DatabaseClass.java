@@ -5825,35 +5825,38 @@ public void insertAnswer(int eId, int qid, String question, String ans) {
             dpstm.executeUpdate();
         }
 
-        String correct = getCorrectAnswer(qid);
+            String questionType = "";
+            String correct = "";
+            try (PreparedStatement typeStmt = conn.prepareStatement(
+                    "SELECT correct, question_type FROM questions WHERE question_id=?")) {
+                typeStmt.setInt(1, qid);
+                try (ResultSet rsType = typeStmt.executeQuery()) {
+                    if (rsType.next()) {
+                        correct = rsType.getString("correct");
+                        questionType = rsType.getString("question_type");
+                    }
+                }
+            }
 
-        String status = getAnswerStatus(ans, correct);
+            String status;
+            if ("PARAGRAPH".equalsIgnoreCase(questionType)) {
+                status = "pending";
+                correct = "";
+            } else {
+                status = getAnswerStatus(ans, correct);
+            }
 
-        
+            String userAnswerForDb = (ans != null && !ans.trim().isEmpty()) ? ans.trim() : "N/A";
 
-        String userAnswerForDb = (ans != null && !ans.trim().isEmpty()) ? ans.trim() : "N/A";
-
-
-
-        pstm = conn.prepareStatement(
-
-            "INSERT INTO answers (exam_id, question_id, question, answer, correct_answer, status) VALUES (?, ?, ?, ?, ?, ?)"
-
-        );
-
-        pstm.setInt(1, eId);
-
-        pstm.setInt(2, qid); // Add the question_id
-
-        pstm.setString(3, question);
-
-        pstm.setString(4, userAnswerForDb);
-
-        pstm.setString(5, correct);
-
-        pstm.setString(6, status);
-
-        pstm.executeUpdate();
+            pstm = conn.prepareStatement(
+                "INSERT INTO answers (exam_id, question_id, question, answer, correct_answer, status) VALUES (?, ?, ?, ?, ?, ?)");
+            pstm.setInt(1, eId);
+            pstm.setInt(2, qid);
+            pstm.setString(3, question);
+            pstm.setString(4, userAnswerForDb);
+            pstm.setString(5, correct);
+            pstm.setString(6, status);
+            pstm.executeUpdate();
 
         
 
